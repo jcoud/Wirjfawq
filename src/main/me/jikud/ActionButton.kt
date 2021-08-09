@@ -1,8 +1,6 @@
 package main.me.jikud
 
 import java.awt.Dimension
-import java.math.BigDecimal
-import java.math.RoundingMode
 import javax.swing.JButton
 import kotlin.math.floor
 
@@ -21,7 +19,7 @@ class ActionButton(private var nn: String, private val multiplier: Double, priva
             CookieClicker.multiplier += multiplier
             CookieClicker.score -= price * 1000
             count++
-            price *= floor(count + 0.4)
+            price *= count + 0.4
 //            price = "$price".format("%.2f").toDouble()
             updateText()
         }

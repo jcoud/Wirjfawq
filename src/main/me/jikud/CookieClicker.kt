@@ -11,9 +11,13 @@ class CookieClicker : Runnable {
         val font = Font("Consolas", Font.PLAIN, 12)
         var score = 0.0
         var multiplier = 1.0
-        val scorePanel = JLabel("$score").apply {
-//            font = font.deriveFont(font.size + 5f)
+        val scorePanel = JLabel("$score", SwingConstants.CENTER).also {
+        }.apply {
+            isOpaque = true
+            background = Color.RED
             font = CookieClicker.font
+            border = BorderFactory.createLineBorder(Color.BLACK)
+            foreground = Color.WHITE
         }
         val btns = arrayListOf<ActionButton>()
 
@@ -49,7 +53,13 @@ class CookieClicker : Runnable {
         val cookieButton = JButton().apply {
             preferredSize = Dimension(100, 100)
             background = Color.BLACK
-            isOpaque = true
+            isOpaque = false
+            isContentAreaFilled = false
+            isBorderPainted = false
+            isFocusCycleRoot = false
+            addActionListener {
+                score += 1000
+            }
         }
         buttonPanel.add(makeActionButton("+ Click", 1.0, 10.0))
         buttonPanel.add(makeActionButton("+ Delivery", 5.0, 50.0))
@@ -58,7 +68,6 @@ class CookieClicker : Runnable {
         panel.layout = layout
 
         con.fill = GridBagConstraints.HORIZONTAL
-        con.anchor = GridBagConstraints.CENTER
         con.gridwidth = 3
         con.weightx = 1.0
         layout.setConstraints(scorePanel, con)
@@ -99,7 +108,7 @@ class CookieClicker : Runnable {
 
     private fun updateScore() {
         score += multiplier
-        scorePanel.text = "${score / 1000} + $multiplier".format("{0:n0}")
+        scorePanel.text = "${score / 1000} + $multiplier".format("%0.3f")
         btns.forEach(ActionButton::updateButton)
     }
 
