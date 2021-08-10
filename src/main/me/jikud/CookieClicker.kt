@@ -3,23 +3,27 @@ package main.me.jikud
 import java.awt.*
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.*
 import javax.swing.*
 
 class CookieClicker : Runnable {
 
     companion object {
+        lateinit var frame: JFrame
+
         val font = Font("Consolas", Font.PLAIN, 12)
-        var score = 0.0
-        var multiplier = 1.0
-        val scorePanel = JLabel("$score", SwingConstants.CENTER).also {
-        }.apply {
+        var score = 0
+        var multiplier = 1
+        val scorePanel = JLabel("$score", SwingConstants.CENTER).apply {
             isOpaque = true
             background = Color.RED
-            font = CookieClicker.font
+            font = CookieClicker.font.deriveFont(20f)
             border = BorderFactory.createLineBorder(Color.BLACK)
             foreground = Color.WHITE
         }
-        val btns = arrayListOf<ActionButton>()
+        val jbtns = arrayListOf<ActionButton>()
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -29,10 +33,10 @@ class CookieClicker : Runnable {
     }
 
     private fun init() {
-        val frame = JFrame()
+        frame = JFrame()
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-        frame.size = Dimension(400, 400)
-        frame.add(mainPanel())
+        frame.preferredSize = Dimension(500, 500)
+        frame.add(makeMainView())
         frame.defaultCloseOperation = WindowConstants.DO_NOTHING_ON_CLOSE
         frame.isVisible = true
         frame.addWindowListener(object : WindowAdapter() {
@@ -41,28 +45,23 @@ class CookieClicker : Runnable {
                 frame.dispose()
             }
         })
-//        frame.pack()
+        frame.pack()
         frame.setLocationRelativeTo(null)
     }
 
-    private fun mainPanel(): JPanel {
+    private fun makeMainView(): JPanel {
         val panel = JPanel()
         val buttonPanel = JPanel()
         buttonPanel.layout = BoxLayout(buttonPanel, BoxLayout.Y_AXIS)
         buttonPanel.border = BorderFactory.createLineBorder(Color.BLACK)
-        val cookieButton = JButton().apply {
-            preferredSize = Dimension(100, 100)
-            background = Color.BLACK
-            isOpaque = false
-            isContentAreaFilled = false
-            isBorderPainted = false
-            isFocusCycleRoot = false
-            addActionListener {
-                score += 1000
-            }
-        }
-        buttonPanel.add(makeActionButton("+ Click", 1.0, 10.0))
-        buttonPanel.add(makeActionButton("+ Delivery", 5.0, 50.0))
+        val cookieButton = ActionButton()
+        buttonPanel.add(makeActionButton("Cooper", 1, 10))
+        buttonPanel.add(makeActionButton("Lead", 5, 50))
+        buttonPanel.add(makeActionButton("Iron", 20, 200))
+        buttonPanel.add(makeActionButton("Tungsten", 50, 700))
+        buttonPanel.add(makeActionButton("Gold", 100, 1000))
+        buttonPanel.add(makeActionButton("Platinum", 300, 5000))
+        buttonPanel.add(makeActionButton("Titan", 500, 50000))
         val layout = GridBagLayout()
         val con = GridBagConstraints()
         panel.layout = layout
@@ -83,7 +82,7 @@ class CookieClicker : Runnable {
         panel.add(cookieButton)
 
 //        con.gridx = 2
-//        con.anchor = GridBagConstraints.EAST
+        con.anchor = GridBagConstraints.EAST
         con.gridwidth = 1
         con.weightx = 1.0
         layout.setConstraints(buttonPanel, con)
@@ -91,25 +90,21 @@ class CookieClicker : Runnable {
         return panel
     }
 
-    private fun makeActionButton(name: String, multiplier: Double, price: Double): JButton {
+    private fun makeActionButton(name: String, multiplier: Int, price: Int): JButton {
         val button = ActionButton(name, multiplier, price)
-        btns += button
+        jbtns += button
         return button
     }
 
-    private var last = System.currentTimeMillis()
     private fun update() {
-        val now = System.currentTimeMillis()
-        if (now - last >= 1) {
-            updateScore()
-            last = now
-        }
+        updateScore()
+//        IOHandler.printEvent()
     }
 
     private fun updateScore() {
         score += multiplier
-        scorePanel.text = "${score / 1000} + $multiplier".format("%0.3f")
-        btns.forEach(ActionButton::updateButton)
+        scorePanel.text = NumberFormat.getNumberInstance(Locale.FRANCE).format(score.toDouble() / 1000) + " + $multiplier"
+        jbtns.forEach(ActionButton::updateButton)
     }
 
     private fun render() {

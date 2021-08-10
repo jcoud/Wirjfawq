@@ -6,9 +6,14 @@ object Loop {
     var running = false
     fun loop(init: Runnable, update: Runnable, render: Runnable) {
         init.run()
+        var last = System.currentTimeMillis()
         while (running) {
-            update.run()
-            render.run()
+            val now = System.currentTimeMillis()
+            if (now - last >= 1) {
+                update.run()
+                render.run()
+            }
+            last = now
 //            Thread.sleep((1 / 60) * 1000)
 
         }
