@@ -11,8 +11,6 @@ import javax.swing.*
 class CookieClicker : Runnable {
 
     companion object {
-        lateinit var frame: JFrame
-
         val font = Font("Consolas", Font.PLAIN, 12)
         var score = 0
         var multiplier = 1
@@ -33,7 +31,7 @@ class CookieClicker : Runnable {
     }
 
     private fun init() {
-        frame = JFrame()
+        val frame = JFrame()
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
         frame.preferredSize = Dimension(500, 500)
         frame.add(makeMainView())
@@ -103,7 +101,7 @@ class CookieClicker : Runnable {
 
     private fun updateScore() {
         score += multiplier
-        scorePanel.text = NumberFormat.getNumberInstance(Locale.FRANCE).format(score.toDouble() / 1000) + " + $multiplier"
+        scorePanel.text = "${score.toDouble() / 1000}".format("{0:D3}") + " + $multiplier"
         jbtns.forEach(ActionButton::updateButton)
     }
 
