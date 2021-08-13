@@ -4,30 +4,32 @@ import java.awt.*
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.text.DecimalFormat
-import java.text.NumberFormat
-import java.util.*
 import javax.swing.*
 
-class CookieClicker : Runnable {
+class OreClicker : Runnable {
 
     companion object {
         val font = Font("Consolas", Font.PLAIN, 12)
-        var score = 0
-        var multiplier = 1
+        var score = 0L
+        var multiplier = 1L
         val scorePanel = JLabel("$score", SwingConstants.CENTER).apply {
             isOpaque = true
             background = Color.RED
-            font = CookieClicker.font.deriveFont(20f)
+            font = OreClicker.font.deriveFont(20f)
             border = BorderFactory.createLineBorder(Color.BLACK)
             foreground = Color.WHITE
         }
-        val jbtns = arrayListOf<ActionButton>()
+        val actionButtons = arrayListOf<ActionButton>()
+        val multiplierButtons = arrayListOf<MultiplierButton>()
 
         @JvmStatic
         fun main(args: Array<String>) {
-            Thread(CookieClicker()).start()
+            Thread(OreClicker()).start()
             Loop.start()
         }
+
+        @JvmStatic
+        fun sf(number: Long) = DecimalFormat("#,##0,000").format(number).replace(",", "'")
     }
 
     private fun init() {
@@ -49,17 +51,17 @@ class CookieClicker : Runnable {
 
     private fun makeMainView(): JPanel {
         val panel = JPanel()
-        val buttonPanel = JPanel()
-        buttonPanel.layout = BoxLayout(buttonPanel, BoxLayout.Y_AXIS)
-        buttonPanel.border = BorderFactory.createLineBorder(Color.BLACK)
+        val actionButtonPanel = JPanel()
+        val multiplierButtonPanel = JPanel()
+        actionButtonPanel.layout = BoxLayout(actionButtonPanel, BoxLayout.Y_AXIS)
+        actionButtonPanel.border = BorderFactory.createLineBorder(Color.BLACK)
         val cookieButton = ActionButton()
-        buttonPanel.add(makeActionButton("Cooper", 1, 10))
-        buttonPanel.add(makeActionButton("Lead", 5, 50))
-        buttonPanel.add(makeActionButton("Iron", 20, 200))
-        buttonPanel.add(makeActionButton("Tungsten", 50, 700))
-        buttonPanel.add(makeActionButton("Gold", 100, 1000))
-        buttonPanel.add(makeActionButton("Platinum", 300, 5000))
-        buttonPanel.add(makeActionButton("Titan", 500, 50000))
+        MultiplierNames.values().forEach {
+            multiplierButtonPanel.add(makeMultiplierButton(it))
+        }
+        ActionButtonNames.values().forEach {
+            actionButtonPanel.add(makeActionButton(it))
+        }
         val layout = GridBagLayout()
         val con = GridBagConstraints()
         panel.layout = layout
@@ -83,32 +85,31 @@ class CookieClicker : Runnable {
         con.anchor = GridBagConstraints.EAST
         con.gridwidth = 1
         con.weightx = 1.0
-        layout.setConstraints(buttonPanel, con)
-        panel.add(buttonPanel)
+        layout.setConstraints(actionButtonPanel, con)
+        panel.add(actionButtonPanel)
         return panel
     }
 
-    private fun makeActionButton(name: String, multiplier: Int, price: Int): JButton {
-        val button = ActionButton(name, multiplier, price)
-        jbtns += button
+    private fun makeMultiplierButton(mn: MultiplierNames): JPanel {
+        val button = MultiplierButton(mn)
+        multiplierButtons += button
+        return button
+    }
+
+    private fun makeActionButton(abn: ActionButtonNames): JPanel {
+        val button = ActionButton(abn)
+        actionButtons += button
         return button
     }
 
     private fun update() {
-        updateScore()
-//        IOHandler.printEvent()
-    }
-
-    private fun updateScore() {
         score += multiplier
-        scorePanel.text = "${score.toDouble() / 1000}".format("{0:D3}") + " + $multiplier"
-        jbtns.forEach(ActionButton::updateButton)
-    }
-
-    private fun render() {
+        scorePanel.text = sf(score) + " + $multiplier"
+        actionButtons.forEach(ActionButton::update)
+        multiplierButtons.forEach(MultiplierButton::update)
     }
 
     override fun run() {
-        Loop.loop(this::init, this::update, this::render)
+        Loop.loop(this::init, this::update)
     }
 }
