@@ -19,8 +19,8 @@ class OreClicker : Runnable {
             border = BorderFactory.createLineBorder(Color.BLACK)
             foreground = Color.WHITE
         }
-        val actionButtons = arrayListOf<ActionButton>()
-        val multiplierButtons = arrayListOf<MultiplierButton>()
+//        val actionButtons = arrayListOf<ActionButton>()
+//        val multiplierButtons = arrayListOf<MultiplierButton>()
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -55,12 +55,16 @@ class OreClicker : Runnable {
         val multiplierButtonPanel = JPanel()
         actionButtonPanel.layout = BoxLayout(actionButtonPanel, BoxLayout.Y_AXIS)
         actionButtonPanel.border = BorderFactory.createLineBorder(Color.BLACK)
-        val cookieButton = ActionButton()
-        MultiplierNames.values().forEach {
-            multiplierButtonPanel.add(makeMultiplierButton(it))
+        val cookieButton = ActionButtonNames.BIG_BUTTON
+        MultiplierNames.values().forEach { ml ->
+            ml.text_ = "x2C"
+            //todo: добавить на каждую кнопку по несколько умножителей (по количеству из MultiplierNames)
+            ActionButtonNames.list().forEach {
+                multiplierButtonPanel.add(it.button)
+            }
         }
         ActionButtonNames.values().forEach {
-            actionButtonPanel.add(makeActionButton(it))
+            actionButtonPanel.add(it.button)
         }
         val layout = GridBagLayout()
         val con = GridBagConstraints()
@@ -68,7 +72,11 @@ class OreClicker : Runnable {
 
         con.fill = GridBagConstraints.HORIZONTAL
         con.gridwidth = 3
+        layout.setConstraints(multiplierButtonPanel, con)
+        panel.add(multiplierButtonPanel)
+
         con.weightx = 1.0
+        con.gridy = 1
         layout.setConstraints(scorePanel, con)
         panel.add(scorePanel)
 
@@ -77,9 +85,9 @@ class OreClicker : Runnable {
         con.anchor = GridBagConstraints.CENTER
         con.gridwidth = 2
 //        con.ipadx = 45
-        con.gridy = 1
-        layout.setConstraints(cookieButton, con)
-        panel.add(cookieButton)
+        con.gridy = 2
+        layout.setConstraints(cookieButton.button, con)
+        panel.add(cookieButton.button)
 
 //        con.gridx = 2
         con.anchor = GridBagConstraints.EAST
@@ -90,23 +98,11 @@ class OreClicker : Runnable {
         return panel
     }
 
-    private fun makeMultiplierButton(mn: MultiplierNames): JPanel {
-        val button = MultiplierButton(mn)
-        multiplierButtons += button
-        return button
-    }
-
-    private fun makeActionButton(abn: ActionButtonNames): JPanel {
-        val button = ActionButton(abn)
-        actionButtons += button
-        return button
-    }
-
     private fun update() {
         score += multiplier
         scorePanel.text = sf(score) + " + $multiplier"
-        actionButtons.forEach(ActionButton::update)
-        multiplierButtons.forEach(MultiplierButton::update)
+        ActionButtonNames.list().forEach(ActionButtonNames::update)
+        MultiplierNames.list().forEach(MultiplierNames::update)
     }
 
     override fun run() {
