@@ -4,9 +4,13 @@ import java.awt.*
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.util.*
 import javax.swing.*
 
 class OreClicker : Runnable {
+
+    private var cpls = arrayListOf<CoopButton>()
 
     companion object {
         val font = Font("Consolas", Font.PLAIN, 12)
@@ -29,11 +33,13 @@ class OreClicker : Runnable {
         }
 
         @JvmStatic
-        fun sf(number: Long) = DecimalFormat("#,##0,000").format(number).replace(",", "'")
+        fun sf(number: Long) = NumberFormat.getNumberInstance(Locale.US).format(number)
     }
 
+    lateinit var frame: JFrame
+
     private fun init() {
-        val frame = JFrame()
+        frame = JFrame()
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
         frame.preferredSize = Dimension(500, 500)
         frame.add(makeMainView())
@@ -53,17 +59,26 @@ class OreClicker : Runnable {
         val panel = JPanel()
         val actionButtonPanel = JPanel()
         val multiplierButtonPanel = JPanel()
+        val cookieButton = ActionButtonNames.BIG_BUTTON.button
+
+        multiplierButtonPanel.layout = BoxLayout(multiplierButtonPanel, BoxLayout.Y_AXIS)
         actionButtonPanel.layout = BoxLayout(actionButtonPanel, BoxLayout.Y_AXIS)
+
+        multiplierButtonPanel.border = BorderFactory.createLineBorder(Color.BLACK)
         actionButtonPanel.border = BorderFactory.createLineBorder(Color.BLACK)
-        val cookieButton = ActionButtonNames.BIG_BUTTON
-        MultiplierNames.values().forEach { ml ->
-            ml.text_ = "x2C"
-            //todo: добавить на каждую кнопку по несколько умножителей (по количеству из MultiplierNames)
+
+        //todo: добавить на каждую кнопку по несколько умножителей (по количеству из MultiplierNames)
+        MultiplierNames.list().forEach { ml ->
+            val jp = JPanel()
+            jp.layout = BoxLayout(jp, BoxLayout.X_AXIS)
             ActionButtonNames.list().forEach {
-                multiplierButtonPanel.add(it.button)
+                val cp = CoopButton(it, ml)
+                cpls += cp
+                jp.add(cp)
             }
+            multiplierButtonPanel.add(jp)
         }
-        ActionButtonNames.values().forEach {
+        ActionButtonNames.list().forEach {
             actionButtonPanel.add(it.button)
         }
         val layout = GridBagLayout()
@@ -81,16 +96,17 @@ class OreClicker : Runnable {
         panel.add(scorePanel)
 
         con.fill = GridBagConstraints.NONE
-        con.weightx = .7
-        con.anchor = GridBagConstraints.CENTER
+        con.weightx = 1.0
+//        con.anchor = GridBagConstraints.CENTER
         con.gridwidth = 2
-//        con.ipadx = 45
+//        con.ipadx = 50
+        con.insets = Insets(10, 10, 10, 10)
         con.gridy = 2
-        layout.setConstraints(cookieButton.button, con)
-        panel.add(cookieButton.button)
+        layout.setConstraints(cookieButton, con)
+        panel.add(cookieButton)
 
 //        con.gridx = 2
-        con.anchor = GridBagConstraints.EAST
+//        con.anchor = GridBagConstraints.EAST
         con.gridwidth = 1
         con.weightx = 1.0
         layout.setConstraints(actionButtonPanel, con)
@@ -100,9 +116,9 @@ class OreClicker : Runnable {
 
     private fun update() {
         score += multiplier
-        scorePanel.text = sf(score) + " + $multiplier"
+        scorePanel.text = "${sf(score)} + $multiplier"
         ActionButtonNames.list().forEach(ActionButtonNames::update)
-        MultiplierNames.list().forEach(MultiplierNames::update)
+        cpls.forEach(CoopButton::update)
     }
 
     override fun run() {
