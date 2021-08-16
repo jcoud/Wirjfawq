@@ -39,7 +39,7 @@ class OreClicker : Runnable {
     lateinit var frame: JFrame
 
     private fun init() {
-        frame = JFrame()
+        frame = JFrame("OreClicker | Score: ${sf(score)}")
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
         frame.preferredSize = Dimension(500, 500)
         frame.add(makeMainView())
@@ -121,7 +121,11 @@ class OreClicker : Runnable {
         cpls.forEach(CoopButton::update)
     }
 
+    private fun ups() {
+        frame.title = "OreClicker | Score: ${sf(score)}"
+    }
+
     override fun run() {
-        Loop.loop(this::init, this::update)
+        Loop.loop(this::init, this::update, this::ups)
     }
 }
